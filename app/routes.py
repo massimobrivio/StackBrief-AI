@@ -1,8 +1,8 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, SubscriptionForm
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User
+from app.models import User, SoftwareTool, UserSoftware
 from urllib.parse import urlparse
 
 
@@ -49,6 +49,34 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 @app.route('/manage_tools', methods=['GET', 'POST'])
+@login_required
 def manage_tools():
-    # function code
-    pass
+    form = SubscriptionForm()
+    # Populate the select field with software tools not already subscribed to
+    subscribed_software_ids = [subscription.software_id for subscription in current_user.subscriptions]
+    available_software = SoftwareTool.query.filter(~SoftwareTool.id.in_(subscribed_software_ids)).all()
+    form.software.choices = [(software.id, software.name) for software in available_software]
+
+    if form.validate_on_submit():
+        software_id = form.software.data
+        subscription = UserSoftware(user_id=current_user.id, software_id=software_id)
+        db.session.add(subscription)
+        db.session.commit()
+        flash('Software tool subscribed successfully.')
+        return redirect(url_for('manage_tools'))
+
+    # Get the user's current subscriptions
+    user_subscriptions = current_user.subscriptions
+    return render_template('manage_tools.html', title='Manage Subscriptions', form=form, subscriptions=user_subscriptions)
+
+@app.route('/unsubscribe/<int:subscription_id>', methods=['POST'])
+@login_required
+def unsubscribe(subscription_id):
+    subscription = UserSoftware.query.filter_by(id=subscription_id, user_id=current_user.id).first()
+    if subscription:
+        db.session.delete(subscription)
+        db.session.commit()
+        flash('Subscription removed.')
+    else:
+        flash('Subscription not found.')
+    return redirect(url_for('manage_tools'))

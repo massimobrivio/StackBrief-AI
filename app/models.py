@@ -7,7 +7,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    tools = db.relationship('UserSoftware', back_populates='user')
+    subscriptions = db.relationship('UserSoftware', back_populates='user', cascade='all, delete-orphan')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -27,7 +27,7 @@ class SoftwareTool(db.Model):
     name = db.Column(db.String(128), unique=True, nullable=False)
     vendor = db.Column(db.String(128))
     official_website = db.Column(db.String(256))
-    users = db.relationship('UserSoftware', back_populates='software')
+    subscribers = db.relationship('UserSoftware', back_populates='software', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<SoftwareTool {self.name}>'
@@ -36,8 +36,8 @@ class UserSoftware(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     software_id = db.Column(db.Integer, db.ForeignKey('software_tool.id'))
-    user = db.relationship('User', back_populates='tools')
-    software = db.relationship('SoftwareTool', back_populates='users')
+    user = db.relationship('User', back_populates='subscriptions')
+    software = db.relationship('SoftwareTool', back_populates='subscribers')
 
 class Update(db.Model):
     id = db.Column(db.Integer, primary_key=True)
