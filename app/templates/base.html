@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>{% block title %}{% endblock %} - AI Newsletter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-info">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <nav>
+            <ul>
+                {% if current_user.is_authenticated %}
+                    <!-- <li><a href="{{ url_for('index') }}">Home</a></li> -->
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                    <!-- <li><a href="{{ url_for('login') }}">Login</a></li> -->
+                    <!-- <li><a href="{{ url_for('register') }}">Register</a></li> -->
+                {% endif %}
+            </ul>
+        </nav>
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
+
+
