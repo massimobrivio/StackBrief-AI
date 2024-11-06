@@ -27,6 +27,8 @@ class SoftwareTool(db.Model):
     name = db.Column(db.String(128), unique=True, nullable=False)
     vendor = db.Column(db.String(128))
     official_website = db.Column(db.String(256))
+    update_source = db.Column(db.String(64))  # e.g., 'api', 'rss', 'scrape'
+    update_url = db.Column(db.String(256))    # URL to fetch updates from
     subscribers = db.relationship('UserSoftware', back_populates='software', cascade='all, delete-orphan')
 
     def __repr__(self):
@@ -46,6 +48,8 @@ class Update(db.Model):
     release_date = db.Column(db.DateTime)
     raw_notes = db.Column(db.Text)
     summary = db.Column(db.Text)
+    
+    __table_args__ = (db.UniqueConstraint('software_id', 'version', name='_software_version_uc'),)
 
     def __repr__(self):
         return f'<Update {self.software_id} - {self.version}>'
