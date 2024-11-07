@@ -24,7 +24,7 @@ def fetch_updates_from_api(software_tool):
         {
             "version": "1.0.0",
             "release_date": datetime(2023, 1, 1),
-            "raw_notes": "Initial release of API-based tool.",
+            "raw_notes": "Initial release of API-based tool. New features include a red button and possibilities of going to the moon.",
         },
         {
             "version": "1.1.0",
